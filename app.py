@@ -9,6 +9,7 @@ import nltk
 import spacy
 import string
 pd.options.mode.chained_assignment = None
+nltk.download('stopwords')
 
 st.set_page_config(page_title="Message Classification")
 
