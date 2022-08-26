@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import Counter
+from nltk.corpus import stopwords
 import re
 import nltk
 import spacy
@@ -65,6 +66,29 @@ def main():
         spamMsgWC_df = pd.DataFrame(cnt_spam.most_common(15),columns=['words', 'count'])
         nonSpamMsgWC_df = pd.DataFrame(cnt_nonSpam.most_common(15),columns=['words', 'count'])
 
+
+        # Removal of stopwords
+        STOPWORDS = set(stopwords.words('english'))
+        def remove_stopwords(text):
+            return " ".join([word for word in str(text).split() if word not in STOPWORDS])
+
+        df["Message_body"] = df["Message_body"].apply(lambda text: remove_stopwords(text))
+
+        # Creating same type of Label data into different variables for no stop words
+        spam_Message_nsw = df[df['Label']=='Spam']
+        nonSpam_Message_nsw = df[df['Label']=='Non-Spam']
+
+        cnt_spam_nsw = Counter()
+        cnt_nonSpam_nsw = Counter()
+
+        Word_Count(spam_Message_nsw,cnt_spam_nsw)
+        Word_Count(nonSpam_Message_nsw,cnt_nonSpam_nsw)
+
+        # Creating word count dataframe (no stop words), for visualization
+        spamMsgWC_nsw_df = pd.DataFrame(cnt_spam_nsw.most_common(15),columns=['words', 'count'])
+        nonSpamMsgWC_nsw_df = pd.DataFrame(cnt_nonSpam_nsw.most_common(15),columns=['words', 'count'])
+        
+
         msgType = st.selectbox('Message Type',['','Spam','Non-Spam'], format_func=lambda x: 'Select an option' if x == '' else x )
         st.markdown("***")
 
@@ -76,12 +100,19 @@ def main():
 
         if msgType == 'Spam':
 
-            # Visualization for common words found in spam msgs (including all words)
             with column_left:
+                # Visualization for common words found in spam msgs (including all words)
                 fig, ax = plt.subplots(figsize=(6, 8))
                 spamMsgWC_df.sort_values(by='count').plot.barh(x='words',y='count',ax=ax,color="purple")
                 ax.grid(b = True, color ='grey',linestyle ='-', linewidth = 0.5,alpha = 2)
                 ax.set_title("Common Words Found in Messages (Including All Words)")
+                st.pyplot(fig)
+
+                # Visualization for common words found in spam msgs (Without Stop Words)
+                fig, ax = plt.subplots(figsize=(6, 8))
+                spamMsgWC_nsw_df.sort_values(by='count').plot.barh(x='words',y='count',ax=ax,color="purple")
+                ax.grid(b = True, color ='grey',linestyle ='-', linewidth = 0.5,alpha = 2)
+                ax.set_title("Common Words Found in Msgs (Without Stop Words)")
                 st.pyplot(fig)
 
             # Visualization for no of msgs received over dates
@@ -91,15 +122,23 @@ def main():
                 ax.grid(b = True, color ='grey',linestyle ='-', linewidth = 0.5,alpha = 2)
                 ax.set_title("Number of Messages Recieved over Dates", fontdict={'fontsize': 20, 'fontweight': 'medium'})
                 st.pyplot(fig)
-            
+
+
         elif msgType == 'Non-Spam':
 
-            # Visualization for common words found in non-spam msgs (including all words)
             with column_left:
+                # Visualization for common words found in non-spam msgs (including all words)
                 fig, ax = plt.subplots(figsize=(6, 8))
                 nonSpamMsgWC_df.sort_values(by='count').plot.barh(x='words',y='count',ax=ax,color="purple")
                 ax.grid(b = True, color ='grey',linestyle ='-', linewidth = 0.5,alpha = 2)
                 ax.set_title("Common Words Found in Messages (Including All Words)")
+                st.pyplot(fig)
+
+                # Visualization for common words found in non-spam msgs (Without Stop Words)
+                fig, ax = plt.subplots(figsize=(6, 8))
+                nonSpamMsgWC_nsw_df.sort_values(by='count').plot.barh(x='words',y='count',ax=ax,color="purple")
+                ax.grid(b = True, color ='grey',linestyle ='-', linewidth = 0.5,alpha = 2)
+                ax.set_title("Common Words Found in Msgs (Without Stop Words)")
                 st.pyplot(fig)
 
             # Visualization for no of msgs received over dates
@@ -109,6 +148,8 @@ def main():
                 ax.grid(b = True, color ='grey',linestyle ='-', linewidth = 0.5,alpha = 2)
                 ax.set_title("Number of Messages Recieved over Dates", fontdict={'fontsize': 20, 'fontweight': 'medium'})
                 st.pyplot(fig)
+
+        st.markdown("***")
 
 if __name__ == '__main__':
     main()
