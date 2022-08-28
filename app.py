@@ -12,6 +12,7 @@ import string
 pd.options.mode.chained_assignment = None
 nltk.download('stopwords')
 nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
 
 st.set_page_config(page_title="Message Classification")
 
